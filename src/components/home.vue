@@ -20,8 +20,8 @@
         <el-menu
           default-active="/users"
           class="el-menu-vertical-demo"
-          unique-opened=true
-          router=true
+          unique-opened
+          router
           @open="handleOpen"
           @close="handleClose"
         >
@@ -89,7 +89,9 @@
           </el-submenu>
         </el-menu>
       </el-aside>
-      <el-main>Main</el-main>
+      <el-main>
+        <router-view/>
+      </el-main>
     </el-container>
   </el-container>
 </template>

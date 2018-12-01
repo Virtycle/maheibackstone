@@ -26,18 +26,18 @@ export default {
   },
   methods: {
     async tologin() {
-      const {data} = await this.$http.post("/login", this.loginData)
-      if (data.meta.status === 200) {
-        window.sessionStorage.setItem("token", data.data.token)
+      const {data:{data,meta:{status,msg}}} = await this.$http.post("/login", this.loginData)
+      if (status === 200) {
+        window.sessionStorage.setItem("token",data.token)
         this.$message({
           type:'success',
-          message: data.meta.msg
+          message: msg
         })
         this.$router.push('/home')
       } else {
         this.$message({
           type:'error',
-          message: data.meta.msg
+          message: msg
         })
       }
     }

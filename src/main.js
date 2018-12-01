@@ -3,9 +3,9 @@ import App from './App.vue'
 import router from './router/index.js'
 import axios from 'axios'
 import ElementUI from 'element-ui';
-import 'element-ui/lib/theme-chalk/index.css';
+import 'element-ui/lib/theme-chalk/index.css'
 import './assets/css/base.css'
-
+import moment from "moment"
 // Vue.use(axios) 错误示范
 Vue.use(ElementUI)
 // baseURL
@@ -18,7 +18,10 @@ axios.interceptors.request.use(function(config) {
 })
 
 Vue.prototype.$http = axios
-
+// 时间格式化
+Vue.filter('formatDate', (v,formdate) => {
+    return moment(v).format(formdate)
+})
 Vue.config.productionTip = false
 
 new Vue({
