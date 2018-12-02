@@ -81,13 +81,16 @@
     <!-- 用户角色对话框 -->
     <el-dialog title="分配角色" :visible.sync="roleDialog">
       <el-form :model="roles" label-width="100px">
-        <el-form-item label="用户名">
-          <el-input v-model="roles.name" autocomplete="off"></el-input>
-        </el-form-item>
+        <el-form-item label="用户名">{{roles.name}}</el-form-item>
         <el-form-item label="请选择角色">
-          <el-select v-model="roles.arr" placeholder="请选择角色">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+          <el-select v-model="roles.rid">
+            <el-option label="请选" :value="-1" disabled></el-option>
+            <el-option
+              v-for="(item) in roles.arr"
+              :key="item.id"
+              :label="item.roleName"
+              :value="item.id"
+            ></el-option>
           </el-select>
         </el-form-item>
       </el-form>
@@ -144,209 +147,9 @@
   </el-card>
 </template>
 <script>
+import mixins from './users-mixins.js'
 export default {
-  data() {
-    return {
-      // 用户角色
-      roleDialog:false,
-      roles : {
-        id : '',
-        name:'',
-        arr:[]
-      },
-      // 添加用户
-      AddDialogSwich: false,
-      addUsrs: {
-        username: "",
-        password: "",
-        email: "",
-        mobile: ""
-      },
-      // 编辑用户
-      editDialogSwich: false,
-      editUsrs: {
-        id: "",
-        username: "",
-        email: "",
-        mobile: ""
-      },
-      // 表单验证
-      addrules: {
-        username: [
-          { required: true, message: "请输入用户名", trigger: "blur" },
-          { min: 6, max: 12, message: "长度在 6 到 12 个字符", trigger: "blur" }
-        ],
-        password: [{ required: true, message: "请输入密码", trigger: "blur" }]
-      },
-      // 搜索数据
-      searchText: "",
-      // 表格数据
-      usersTableData: [],
-      // 分页数据
-      currentPage: 1,
-      totalPage: 0,
-      pagesize: 5,
-      pageSizes: [3, 5, 7, 10]
-    };
-  },
-  created() {
-    this.getAllusers();
-  },
-
-  methods: {
-    userRole(user) {
-      this.roleDialog = true
-      this.roles.name =username
-
-    },
-    edituserrole () {
-      this.roleDialog = false
-    },
-    // 删除用户
-    async deleteUser(user) {
-      this.$confirm("此操作将永久删除该用户, 是否继续?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      })
-        .then(async () => {
-          const _this = this;
-          const {
-            data: {
-              meta: { msg, status }
-            }
-          } = await this.$http.delete(`users/${user.id}`);
-          if (status === 200) {
-            this.$message({
-              type: "success",
-              message: msg
-            });
-            if (this.usersTableData.length === 1 && this.currentPage !== 1)
-              this.currentPage--;
-            window.setTimeout(_this.getAllusers, 1000);
-          } else {
-            this.$message.warning(msg);
-          }
-        })
-        .catch(() => {
-          this.$message({
-            type: "info",
-            message: "已取消删除"
-          });
-        });
-    },
-    // 编辑用户
-    editDialogOpen(user) {
-      this.editDialogSwich = true;
-      this.editUsrs.username = user.username;
-      this.editUsrs.email = user.email;
-      this.editUsrs.mobile = user.mobile;
-      this.editUsrs.id = user.id;
-    },
-    async handleEdit() {
-      const _this = this;
-      const {
-        data: {
-          meta: { msg, status }
-        }
-      } = await this.$http.put(`users/${this.editUsrs.id}`, this.editUsrs);
-      if (status === 200) {
-        this.$message({
-          type: "success",
-          message: msg
-        });
-        this.editDialogSwich = false;
-        window.setTimeout(_this.getAllusers, 1000);
-      } else {
-        this.$message.warning(msg);
-      }
-    },
-    // 添加用户
-    handleAdduser() {
-      this.$refs.addform.validate(async valid => {
-        if (!valid) {
-          this.$message.warning("表单错误");
-          return;
-        }
-        const _this = this;
-        const {
-          data: {
-            meta: { msg, status }
-          }
-        } = await this.$http.post("users", this.addUsrs);
-        if (status === 201) {
-          this.$message({
-            type: "success",
-            message: msg
-          });
-          this.$refs.addform.resetFields();
-          this.AddDialogSwich = false;
-          window.setTimeout(_this.getAllusers, 1000);
-        } else {
-          this.$message({
-            type: "error",
-            message: msg
-          });
-        }
-      });
-    },
-    async stateChange(val) {
-      const {
-        data: {
-          meta: { msg, status }
-        }
-      } = await this.$http.put(`users/${val.id}/state/${val.mg_state}`);
-      if (status === 200) {
-        this.$message({
-          type: "success",
-          message: msg
-        });
-      } else {
-        this.$message({
-          type: "error",
-          message: msg
-        });
-      }
-    },
-    keyWordSearch() {
-      this.getAllusers();
-    },
-    handleSizeChange(val) {
-      this.pagesize = val;
-      this.getAllusers();
-    },
-    handleCurrentChange(val) {
-      this.currentPage = val;
-      this.getAllusers();
-    },
-
-    async getAllusers() {
-      const {
-        data: {
-          data: { pagenum, total, users },
-          meta: { status, msg }
-        }
-      } = await this.$http.get(
-        `/users?pagenum=${this.currentPage}&pagesize=${this.pagesize}&query=${
-          this.searchText
-        }`
-      );
-      if (status === 200) {
-        this.$message({
-          type: "success",
-          message: msg
-        });
-        this.usersTableData = users;
-        this.totalPage = total;
-        this.currentPage = pagenum;
-      } else {
-        this.$message({
-          type: "error",
-          message: msg
-        });
-      }
-    }
-  }
+  mixins:[mixins]
 };
 </script>
 
