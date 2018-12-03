@@ -6,6 +6,7 @@ import 'element-ui/lib/theme-chalk/index.css'
 import './assets/css/base.css'
 import moment from "moment"
 import myaxios from "./plugins/myaxios"
+import Mybread from './components/mybread.vue'
 // Vue.use(axios) 错误示范
 Vue.use(ElementUI)
 Vue.use(myaxios)
@@ -19,6 +20,7 @@ Vue.use(myaxios)
 // })
 
 // Vue.prototype.$http = axios
+Vue.component(Mybread.name, Mybread)
 // 时间格式化
 Vue.filter('formatDate', (v,formdate) => {
     return moment(v).format(formdate)

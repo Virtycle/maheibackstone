@@ -25,26 +25,26 @@
           @open="handleOpen"
           @close="handleClose"
         >
-          <el-submenu index="/users">
+          <el-submenu index="/users" v-for="item in menu" :key="item.id">
             <template slot="title">
               <i class="el-icon-location"></i>
-              <span>用户管理</span>
+              <span>{{item.authName}}</span>
             </template>
-            <el-menu-item index="/users">
+            <el-menu-item :index="'/'+item1.path" v-for="item1 in item.children" :key="item1.id">
               <i class="el-icon-menu"></i>
-              用户列表
+              {{item1.authName}}
             </el-menu-item>
           </el-submenu>
-          <el-submenu index="2">
+          <!-- <el-submenu index="/Authority">
             <template slot="title">
               <i class="el-icon-location"></i>
               <span>权限管理</span>
             </template>
-            <el-menu-item index="2-1">
+            <el-menu-item index="/role">
               <i class="el-icon-menu"></i>
               角色列表
             </el-menu-item>
-            <el-menu-item index="2-2">
+            <el-menu-item index="/Authority">
               <i class="el-icon-menu"></i>
               权限列表
             </el-menu-item>
@@ -86,7 +86,7 @@
               <i class="el-icon-menu"></i>
               数据报表
             </el-menu-item>
-          </el-submenu>
+          </el-submenu> -->
         </el-menu>
       </el-aside>
       <el-main>
@@ -98,7 +98,9 @@
 <script>
 export default {
   data() {
-    return {};
+    return {
+      menu:[]
+    };
   },
   methods: {
     handleOpen() {},
@@ -106,12 +108,19 @@ export default {
     handleLoginout() {
       sessionStorage.clear()
       this.$router.push('/login')
+    },
+    async getMenu() {
+      const {data:{data}} = await this.$http.get('menus')
+      this.menu = data
+      console.log(data)
     }
-
+  },
+  created() {
+      this.getMenu()
   }
 };
 </script>
-<style>
+<style scoped>
 .el-col {
   height: 60px;
   line-height: 60px;
